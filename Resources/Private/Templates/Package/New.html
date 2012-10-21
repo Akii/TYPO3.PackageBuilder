@@ -4,9 +4,6 @@
 	<meta charset="utf-8">
 	<title>Package Builder</title>
 
-	<emberjs:include loadJQuery="true" loadEmberData="false" version="0.9.8" minified="true"/>
-	<emberjs:handlebars paths="{settings.handlebarTemplatePaths}" />
-
 	<script type="text/javascript">
 		ICE_CONFIGURATION = {ice:jsonConfiguration()};
 	</script>
@@ -16,6 +13,7 @@
 			<script src="{f:uri.resource(uri:uri)}"></script>
 		</f:for>
 	</f:for>
+    <emberjs:handlebars paths="{settings.handlebarTemplatePaths}" />
 
 	<f:for each="{stylesheets}" as="stylesheet">
 		<f:for each="{stylesheet.files}" as="uri">
