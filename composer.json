@@ -1,0 +1,21 @@
+{
+	"name":"typo3/packagebuilder",
+	"description":"Create new packages with GUI modeller",
+	"keywords":["php", "packagebuilder", "code generator"],
+	"type":"typo3-flow-package",
+	"authors":[
+		{
+			"name":"Nico de Haen"
+		}
+	],
+	"require":{
+		"typo3/flow": "*",
+		"typo3/ice": "*",
+		"typo3/parserapi": "*"
+	},
+	"autoload":{
+		"psr-0":{
+			"TYPO3\\PackageBuilder":"Classes/"
+		}
+	}
+}
