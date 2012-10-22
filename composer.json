@@ -11,8 +11,27 @@
 	"require":{
 		"typo3/flow": "*",
 		"typo3/ice": "*",
-		"typo3/parserapi": "*"
+		"typo3/parserapi": "dev-flow3_package",
+		"radmiraal/emberjs": "*"
 	},
+	"repositories": [
+		{
+			"type": "vcs",
+			"url": "http://github.com/nicodh/TYPO3.Ice"
+		},
+		{
+			"type": "vcs",
+			"url": "http://github.com/nicodh/TYPO3.ParserApi"
+		},
+		{
+			"type": "vcs",
+			"url": "http://github.com/nicodh/TYPO3.ParserApi"
+		},
+		{
+			"type": "vcs",
+			"url": "http://github.com/radmiraal/Radmiraal.Emberjs"
+		}
+	],
 	"autoload":{
 		"psr-0":{
 			"TYPO3\\PackageBuilder":"Classes/"
