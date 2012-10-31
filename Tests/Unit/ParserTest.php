@@ -24,11 +24,11 @@ namespace TYPO3\PackageBuilder\Tests;
  *  This copyright notice MUST APPEAR in all copies of the script!
  ***************************************************************/
 
-if(!class_exists('\\TYPO3\\PackageBuilder\\Tests\\BaseTest')) {
-	require_once('../BaseTest.php');
+if(!class_exists('\\TYPO3\\PackageBuilder\\Tests\\UnitBaseTest')) {
+	require_once('../UnitBaseTest.php');
 }
 
-class ParserTest extends BaseTest {
+class ParserTest extends UnitBaseTest {
 
 	/**
 	 * @test

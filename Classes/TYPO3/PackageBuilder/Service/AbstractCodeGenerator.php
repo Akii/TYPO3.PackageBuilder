@@ -149,8 +149,8 @@ abstract class AbstractCodeGenerator {
 	 */
 	protected function renderFluidTemplate($filePath, $variables) {
 		$variables['package'] = $this->package;
-		$standAloneView = new \TYPO3\Fluid\View\StandaloneView();
-		$standAloneView->setFormat('');
+		$standAloneView = $this->objectManager->get('\\TYPO3\\Fluid\\View\\StandaloneView');
+		$standAloneView->setFormat('txt');
 		$standAloneView->setPartialRootPath($this->codeTemplateRootPath . 'Partials');
 		$templatePathAndFilename = $this->codeTemplateRootPath . $filePath;
 		$standAloneView->setTemplatePathAndFilename($templatePathAndFilename);
@@ -165,7 +165,7 @@ abstract class AbstractCodeGenerator {
 	 */
 	protected function renderFluidTemplateSource($templateSource, $variables) {
 		$variables['package'] = $this->package;
-		$standAloneView = new \TYPO3\Fluid\View\StandaloneView();
+		$standAloneView = $this->objectManager->get('\\TYPO3\\Fluid\\View\\StandaloneView');
 		$standAloneView->setFormat('txt');
 		$standAloneView->setTemplateSource($templateSource);
 		$standAloneView->assignMultiple($variables);

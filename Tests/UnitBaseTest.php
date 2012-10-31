@@ -29,7 +29,7 @@ namespace TYPO3\PackageBuilder\Tests;
  * @author Nico de Haen
  */
 
-abstract class BaseTest extends \TYPO3\FLOW3\Tests\UnitTestCase{
+abstract class UnitBaseTest extends \TYPO3\Flow\Tests\BaseTestCase{
 
 	/**
 	 * @var string
@@ -54,13 +54,26 @@ abstract class BaseTest extends \TYPO3\FLOW3\Tests\UnitTestCase{
 	protected $printer;
 
 	/**
-	 * @var \TYPO3\FLOW3\Reflection\ReflectionService
-	 *
-	 * @FLOW3\Inject
+	 * @var ObjectManagerInterface
 	 */
-	protected $reflectionService;
+	protected $objectManager;
+
+	/**
+	 * @var \TYPO3\PackageBuilder\Service\TYPO3\CodeGenerator
+	 * @Flow\Inject
+	 */
+	protected $codeGenerator;
+
+	/**
+	 * @var \TYPO3\PackageBuilder\Service\TYPO3\ClassBuilder
+	 */
+	protected $classBuilder;
+
 
 	public function setUp(){
+		if(!defined('PATH_typo3conf')) {
+			define('PATH_typo3conf','');
+		}
 		$path = dirname(__FILE__);
 		$pathParts = explode('Tests',$path);
 		$this->packagePath = $pathParts[0];
@@ -71,14 +84,17 @@ abstract class BaseTest extends \TYPO3\FLOW3\Tests\UnitTestCase{
 			//$parserPackage = $packageManager->getPackage('TYPO3.ParserApi');
 			//include_once($parserPackage->getClassesPath() . 'Autoloader.php');
 			$pathParts = explode('TYPO3.PackageBuilder',$path);
-			include_once($pathParts[0] . 'Typo3.ParserApi/Classes/Autoloader.php');
+			//include_once($pathParts[0] . 'Typo3.ParserApi/Classes/Autoloader.php');
 			\TYPO3\ParserApi\AutoLoader::register();
 		}
 		$this->parser = new \TYPO3\ParserApi\Service\Parser();
 		$this->printer = new \TYPO3\ParserApi\Service\Printer();
-		\vfsStreamWrapper::register();
-		\vfsStreamWrapper::setRoot(new \vfsStreamDirectory('testDirectory'));
-		$dummyExtensionDir = \vfsStream::url('testDir') . '/';
+		//\org\bovigo\vfs\vfsStream::register();
+		//\org\bovigo\vfs\vfsStream::setRoot(new \org\bovigo\vfs\vfsStreamDirectory('testDirectory'));
+		\org\bovigo\vfs\vfsStream::setup('testDir');
+		$dummyExtensionDir = \org\bovigo\vfs\vfsStream::url('testDir') . '/';
+
+		$dummyExtensionDir = $this->fixturesPath . 'tmp/';
 
 		$this->extension = $this->getMock('TYPO3\PackageBuilder\Domain\Model\Extension',array('getExtensionDir'));
 		$extensionKey = 'dummy';
@@ -89,6 +105,26 @@ abstract class BaseTest extends \TYPO3\FLOW3\Tests\UnitTestCase{
 			$this->any())
 				->method('getExtensionDir')
 				->will($this->returnValue($dummyExtensionDir));
+
+		$this->objectManager = new \TYPO3\Flow\Object\ObjectManager(new \TYPO3\Flow\Core\ApplicationContext('Testing'));
+		$this->codeGenerator = $this->getMock($this->buildAccessibleProxy('\\TYPO3\\PackageBuilder\\Service\\TYPO3\CodeGenerator'), array('dummy'));
+
+		$configurationManager = new \TYPO3\PackageBuilder\Configuration\TYPO3\ConfigurationManager();
+
+		$this->classBuilder = new \TYPO3\PackageBuilder\Service\TYPO3\ClassBuilder();
+		$this->classBuilder->initialize($this->extension, FALSE);
+		$this->inject($this->codeGenerator, 'classBuilder', $this->classBuilder);
+		$this->inject($this->codeGenerator, 'objectManager', $this->objectManager);
+		$this->inject($this->codeGenerator, 'codeTemplateRootPath', $this->packagePath . 'Resources/Private/CodeTemplates/TYPO3/');
+		$this->inject($this->codeGenerator, 'extension', $this->extension);
+		$this->inject($this->codeGenerator, 'editModeEnabled', FALSE);
+		$this->inject($this->classBuilder, 'codeGenerator', $this->codeGenerator);
+		$this->inject($this->classBuilder, 'packageConfigurationManager', $configurationManager);
+		$this->inject($this->classBuilder, 'logger', new \TYPO3\Flow\Log\Logger());
+		$this->classBuilder->initialize($this->extension, FALSE);
+
+		//$this->classBuilder->injectConfigurationManager($configurationManager);
+
 		/**
 		$yamlParser = new Tx_ExtensionBuilder_Utility_SpycYAMLParser();
 		$settings = $yamlParser->YAMLLoadString(file_get_contents(PATH_typo3conf.'ext/extension_builder/Tests/Examples/Settings/settings1.yaml'));
@@ -115,6 +151,33 @@ abstract class BaseTest extends \TYPO3\FLOW3\Tests\UnitTestCase{
 		$classFilePath = $this->packagePath . 'Tests/Fixtures/' . $fileName;
 		$classFileObject = $this->parser->parseFile($classFilePath);
 		return $classFileObject;
+	}
+
+	/**
+	 * Helper function
+	 * @param $name
+	 * @param $entity
+	 * @param $aggregateRoot
+	 * @return object Tx_ExtensionBuilder_Domain_Model_DomainObject
+	 */
+	protected function buildDomainObject($name, $entity = false, $aggregateRoot = false){
+		$domainObject = $this->getMock($this->buildAccessibleProxy('\\TYPO3\\PackageBuilder\\Domain\\Model\\DomainObject'), array('dummy'));
+		$domainObject->setExtension($this->extension);
+		$domainObject->setName($name);
+		$domainObject->setEntity($entity);
+		$domainObject->setAggregateRoot($aggregateRoot);
+		if($aggregateRoot){
+			$defaultActions = array('list','show','new','create','edit','update','delete');
+			foreach($defaultActions as $actionName){
+				$action = $this->objectManager->get('\\TYPO3\\PackageBuilder\\Domain\\Model\\DomainObject\\Action');
+				$action->setName($actionName);
+				if($actionName == 'deleted'){
+					$action->setNeedsTemplate = false;
+				}
+				$domainObject->addAction($action);
+			}
+		}
+		return $domainObject;
 	}
 
 }

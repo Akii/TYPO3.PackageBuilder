@@ -89,6 +89,11 @@ class RoundTrip extends \TYPO3\PackageBuilder\Service\AbstractRoundTrip {
 	protected $extensionRenamed = FALSE;
 
 	/**
+	 * @var \TYPO3\PackageBuilder\Log\FileLogger
+	 */
+	protected $logger;
+
+	/**
 	 * @param \TYPO3\PackageBuilder\Utility\ClassParser $classParser
 	 * @return void
 	 */
@@ -128,7 +133,7 @@ class RoundTrip extends \TYPO3\PackageBuilder\Service\AbstractRoundTrip {
 			$this->previousExtensionDirectory = $extension->getPreviousExtensionDirectory();
 			$this->previousExtensionKey = $extension->getOriginalExtensionKey();
 			$this->packageRenamed = TRUE;
-			\t3lib_div::devlog((('Extension renamed: ' . $this->previousExtensionKey) . ' => ') . $this->package->getExtensionKey(), 'extension_builder', 1, array('$previousExtensionDirectory ' => $this->previousExtensionDirectory));
+			$this->logger->log((('Extension renamed: ' . $this->previousExtensionKey) . ' => ') . $this->package->getExtensionKey(), 'extension_builder', 1, array('$previousExtensionDirectory ' => $this->previousExtensionDirectory));
 		}
 		// Rename the old kickstarter.json file to ExtensionBuilder.json
 		if (file_exists($this->previousExtensionDirectory . 'kickstarter.json')) {
@@ -137,12 +142,12 @@ class RoundTrip extends \TYPO3\PackageBuilder\Service\AbstractRoundTrip {
 		if (file_exists($this->previousExtensionDirectory . \TYPO3\PackageBuilder\Configuration\ConfigurationManager::EXTENSION_BUILDER_SETTINGS_FILE)) {
 			$extensionSchemaBuilder = \t3lib_div::makeInstance('TYPO3\\PackageBuilder\\Service\\ExtensionSchemaBuilder');
 			$jsonConfig = $this->configurationManager->getExtensionBuilderConfiguration($this->previousExtensionKey, FALSE);
-			\t3lib_div::devlog(('old JSON:' . $this->previousExtensionDirectory) . 'ExtensionBuilder.json', 'extension_builder', 0, $jsonConfig);
+			$this->logger->log(('old JSON:' . $this->previousExtensionDirectory) . 'ExtensionBuilder.json', 'extension_builder', 0, $jsonConfig);
 			$this->previousExtension = $extensionSchemaBuilder->build($jsonConfig);
 			$oldDomainObjects = $this->previousExtension->getDomainObjects();
 			foreach ($oldDomainObjects as $oldDomainObject) {
 				$this->oldDomainObjects[$oldDomainObject->getUniqueIdentifier()] = $oldDomainObject;
-				\t3lib_div::devlog((('Old domain object: ' . $oldDomainObject->getName()) . ' - ') . $oldDomainObject->getUniqueIdentifier(), 'extension_builder');
+				$this->logger->log((('Old domain object: ' . $oldDomainObject->getName()) . ' - ') . $oldDomainObject->getUniqueIdentifier(), 'extension_builder');
 			}
 			// now we store all renamed domainObjects in an array to enable detection of renaming in
 			// relationProperties (property->getForeignModel)
@@ -179,7 +184,7 @@ class RoundTrip extends \TYPO3\PackageBuilder\Service\AbstractRoundTrip {
 	 */
 	public function getDomainModelClass(\TYPO3\PackageBuilder\Domain\Model\DomainObject $currentDomainObject) {
 		if (isset($this->oldDomainObjects[$currentDomainObject->getUniqueIdentifier()])) {
-			\t3lib_div::devlog('domainObject identified:' . $currentDomainObject->getName(), 'extension_builder', 0);
+			$this->logger->log('domainObject identified:' . $currentDomainObject->getName(), 'extension_builder', 0);
 			$oldDomainObject = $this->oldDomainObjects[$currentDomainObject->getUniqueIdentifier()];
 			$extensionDir = $this->previousExtensionDirectory;
 			$fileName = (CodeGenerator::getFolderForClassFile($extensionDir, 'Model', FALSE) . $oldDomainObject->getName()) . '.php';
@@ -191,7 +196,7 @@ class RoundTrip extends \TYPO3\PackageBuilder\Service\AbstractRoundTrip {
 				//t3lib_div::devlog('Model class methods','extension_builder',0,$this->classObject->getMethods());
 				if ($oldDomainObject->getName() != $currentDomainObject->getName() || $this->packageRenamed) {
 					if (!$this->packageRenamed) {
-						\t3lib_div::devlog((('domainObject renamed. old: ' . $oldDomainObject->getName()) . ' new: ') . $currentDomainObject->getName(), 'extension_builder');
+						$this->logger->log((('domainObject renamed. old: ' . $oldDomainObject->getName()) . ' new: ') . $currentDomainObject->getName(), 'extension_builder');
 					}
 					$newClassName = $currentDomainObject->getClassName();
 					$this->classObject->setName($newClassName);
@@ -237,17 +242,17 @@ class RoundTrip extends \TYPO3\PackageBuilder\Service\AbstractRoundTrip {
 				}
 				return $this->classObject;
 			} else {
-				\t3lib_div::devLog('class file didn\'t exist:' . $fileName, 'extension_builder', 0);
+				$this->logger->log('class file didn\'t exist:' . $fileName, 'extension_builder', 0);
 			}
 		} else {
-			\t3lib_div::devlog('domainObject not identified:' . $currentDomainObject->getName(), 'extension_builder', 0, $this->oldDomainObjects);
+			$this->logger->log('domainObject not identified:' . $currentDomainObject->getName(), 'extension_builder', 0, $this->oldDomainObjects);
 			$fileName = (CodeGenerator::getFolderForClassFile($this->packageDirectory, 'Model', FALSE) . $currentDomainObject->getName()) . '.php';
 			if (file_exists($fileName)) {
 				// import the classObject from the existing file
 				include_once $fileName;
 				$className = $currentDomainObject->getClassName();
 				$this->classObject = $this->classParser->parse($className);
-				\t3lib_div::devLog(('class file found:' . $currentDomainObject->getName()) . '.php', 'extension_builder', 0, (array) $this->classObject->getAnnotations());
+				$this->logger->log(('class file found:' . $currentDomainObject->getName()) . '.php', 'extension_builder', 0, (array) $this->classObject->getAnnotations());
 				return $this->classObject;
 			}
 		}
@@ -264,7 +269,7 @@ class RoundTrip extends \TYPO3\PackageBuilder\Service\AbstractRoundTrip {
 			$oldDomainObject = $this->oldDomainObjects[$currentDomainObject->getUniqueIdentifier()];
 			$fileName = (CodeGenerator::getFolderForClassFile($extensionDir, 'Controller', FALSE) . $oldDomainObject->getName()) . 'Controller.php';
 			if (file_exists($fileName)) {
-				\t3lib_div::devlog('existing controller class:' . $fileName, 'extension_builder', 0);
+				$this->logger->log('existing controller class:' . $fileName, 'extension_builder', 0);
 				include_once $fileName;
 				$className = $oldDomainObject->getControllerName();
 				$this->classObject = $this->classParser->parse($className);
@@ -288,13 +293,13 @@ class RoundTrip extends \TYPO3\PackageBuilder\Service\AbstractRoundTrip {
 						if (!isset($newActions[$oldAction->getName()])) {
 							// an action was removed
 							$this->classObject->removeMethod($oldAction->getName() . 'Action');
-							\t3lib_div::devlog('Action method removed:' . $oldAction->getName(), 'extension_builder', 0, $this->classObject->getMethods());
+							$this->logger->log('Action method removed:' . $oldAction->getName(), 'extension_builder', 0, $this->classObject->getMethods());
 						}
 					}
 				}
 				return $this->classObject;
 			} else {
-				\t3lib_div::devLog('class file didn\'t exist:' . $fileName, 'extension_builder', 2);
+				$this->logger->log('class file didn\'t exist:' . $fileName, 'extension_builder', 2);
 				return NULL;
 			}
 		} else {
@@ -305,10 +310,10 @@ class RoundTrip extends \TYPO3\PackageBuilder\Service\AbstractRoundTrip {
 				$this->classObject = $this->classParser->parse($className);
 				return $this->classObject;
 			} else {
-				\t3lib_div::devlog('No existing controller class:' . $fileName, 'extension_builder', 2);
+				$this->logger->log('No existing controller class:' . $fileName, 'extension_builder', 2);
 			}
 		}
-		\t3lib_div::devlog('No existing controller class:' . $currentDomainObject->getName(), 'extension_builder', 2);
+		$this->logger->log('No existing controller class:' . $currentDomainObject->getName(), 'extension_builder', 2);
 		return NULL;
 	}
 
@@ -411,7 +416,7 @@ class RoundTrip extends \TYPO3\PackageBuilder\Service\AbstractRoundTrip {
 				}
 				return $this->classObject;
 			} else {
-				\t3lib_div::devLog('class file didn\'t exist:' . $fileName, 'extension_builder', 2);
+				$this->logger->log('class file didn\'t exist:' . $fileName, 'extension_builder', 2);
 			}
 		} else {
 			$fileName = (CodeGenerator::getFolderForClassFile($extensionDir, 'Repository', FALSE) . $currentDomainObject->getName()) . 'Repository.php';
@@ -419,11 +424,11 @@ class RoundTrip extends \TYPO3\PackageBuilder\Service\AbstractRoundTrip {
 				include_once $fileName;
 				$className = $currentDomainObject->getDomainRepositoryClassName();
 				$this->classObject = $this->classParser->parse($className);
-				\t3lib_div::devlog('existing Repository class:' . $fileName, 'extension_builder', 0, (array) $this->classObject);
+				$this->logger->log('existing Repository class:' . $fileName, 'extension_builder', 0, (array) $this->classObject);
 				return $this->classObject;
 			}
 		}
-		\t3lib_div::devlog('No existing Repository class:' . $currentDomainObject->getName(), 'extension_builder', 2);
+		$this->logger->log('No existing Repository class:' . $currentDomainObject->getName(), 'extension_builder', 2);
 		return NULL;
 	}
 
@@ -446,7 +451,7 @@ class RoundTrip extends \TYPO3\PackageBuilder\Service\AbstractRoundTrip {
 				$newProperty = $newProperties[$oldProperty->getUniqueIdentifier()];
 				// relation type changed
 				if ($oldProperty->isAnyToManyRelation() != $newProperty->isAnyToManyRelation()) {
-					\t3lib_div::devlog((('property type changed:' . $oldProperty->getName()) . ' ') . $newProperty->getName(), 'extension_builder', 0, $newProperties);
+					$this->logger->log((('property type changed:' . $oldProperty->getName()) . ' ') . $newProperty->getName(), 'extension_builder', 0, $newProperties);
 					// remove old methods since we won't convert getter and setter methods to add/remove methods
 					if ($oldProperty->isAnyToManyRelation()) {
 						$this->classObject->removeMethod('add' . ucfirst(\TYPO3\PackageBuilder\Utility\Inflector::singularize($oldProperty->getName())));
@@ -458,7 +463,7 @@ class RoundTrip extends \TYPO3\PackageBuilder\Service\AbstractRoundTrip {
 						$this->classObject->removeMethod('is' . ucfirst(\TYPO3\PackageBuilder\Utility\Inflector::singularize($oldProperty->getName())));
 					}
 					$this->classObject->removeProperty($oldProperty->getName());
-					\t3lib_div::devlog('property type changed => removed old property:' . $oldProperty->getName(), 'extension_builder', 1);
+					$this->logger->log('property type changed => removed old property:' . $oldProperty->getName(), 'extension_builder', 1);
 				} else {
 					$this->updateProperty($oldProperty, $newProperty);
 					$newDomainObject->getPropertyByName($newProperty->getName())->setNew(FALSE);
@@ -481,14 +486,14 @@ class RoundTrip extends \TYPO3\PackageBuilder\Service\AbstractRoundTrip {
 		if ($propertyToRemove->isAnyToManyRelation()) {
 			$this->classObject->removeMethod('add' . ucfirst(\TYPO3\PackageBuilder\Utility\Inflector::singularize($propertyName)));
 			$this->classObject->removeMethod('remove' . ucfirst(\TYPO3\PackageBuilder\Utility\Inflector::singularize($propertyName)));
-			\t3lib_div::devLog(('Methods removed: ' . 'add') . ucfirst(\TYPO3\PackageBuilder\Utility\Inflector::singularize($propertyName)), 'extension_builder');
+			$this->logger->log(('Methods removed: ' . 'add') . ucfirst(\TYPO3\PackageBuilder\Utility\Inflector::singularize($propertyName)), 'extension_builder');
 		}
 		$this->classObject->removeMethod('get' . ucfirst($propertyName));
 		$this->classObject->removeMethod('set' . ucfirst($propertyName));
 		if ($propertyToRemove->isBoolean()) {
 			$this->classObject->removeMethod('is' . ucfirst($propertyName));
 		}
-		\t3lib_div::devLog(('Methods removed: ' . 'get') . ucfirst($propertyName), 'extension_builder');
+		$this->logger->log(('Methods removed: ' . 'get') . ucfirst($propertyName), 'extension_builder');
 	}
 
 	/**
@@ -526,17 +531,17 @@ class RoundTrip extends \TYPO3\PackageBuilder\Service\AbstractRoundTrip {
 			return TRUE;
 		}
 		if ($newProperty->getName() != $oldProperty->getName()) {
-			\t3lib_div::devlog((('property renamed:' . $oldProperty->getName()) . ' ') . $newProperty->getName(), 'extension_builder', 0);
+			$this->logger->log((('property renamed:' . $oldProperty->getName()) . ' ') . $newProperty->getName(), 'extension_builder', 0);
 			return TRUE;
 		}
 		if ($newProperty->getTypeForComment() != $this->updateExtensionKey($oldProperty->getTypeForComment())) {
-			\t3lib_div::devlog((('property type changed from ' . $this->updateExtensionKey($oldProperty->getTypeForComment())) . ' to ') . $newProperty->getTypeForComment(), 'extension_builder', 0);
+			$this->logger->log((('property type changed from ' . $this->updateExtensionKey($oldProperty->getTypeForComment())) . ' to ') . $newProperty->getTypeForComment(), 'extension_builder', 0);
 			return TRUE;
 		}
 		if ($newProperty->isRelation()) {
 			// if only the related domain object was renamed
 			if ($this->getForeignClassName($newProperty) != $this->updateExtensionKey($oldProperty->getForeignClassName())) {
-				\t3lib_div::devlog((('related domainObject was renamed:' . $this->updateExtensionKey($oldProperty->getForeignClassName())) . ' ->') . $this->getForeignClassName($newProperty), 'extension_builder');
+				$this->logger->log((('related domainObject was renamed:' . $this->updateExtensionKey($oldProperty->getForeignClassName())) . ' ->') . $this->getForeignClassName($newProperty), 'extension_builder');
 				return TRUE;
 			}
 		}
@@ -574,7 +579,7 @@ class RoundTrip extends \TYPO3\PackageBuilder\Service\AbstractRoundTrip {
 		if ($newProperty->getTypeForComment() != $this->updateExtensionKey($oldProperty->getTypeForComment())) {
 			if ($oldProperty->isBoolean() && !$newProperty->isBoolean()) {
 				$this->classObject->removeMethod($this->classBuilder->getMethodName($oldProperty, 'is'));
-				\t3lib_div::devlog('Method removed:' . $this->classBuilder->getMethodName($oldProperty, 'is'), 'extension_builder', 1, $this->classObject->getMethods());
+				$this->logger->log('Method removed:' . $this->classBuilder->getMethodName($oldProperty, 'is'), 'extension_builder', 1, $this->classObject->getMethods());
 			}
 		}
 	}
@@ -596,7 +601,7 @@ class RoundTrip extends \TYPO3\PackageBuilder\Service\AbstractRoundTrip {
 			return;
 		}
 		$newMethodName = $this->classBuilder->getMethodName($newProperty, $methodType);
-		\t3lib_div::devlog((('updateMethod:' . $oldMethodName) . '=>') . $newMethodName, 'extension_builder');
+		$this->logger->log((('updateMethod:' . $oldMethodName) . '=>') . $newMethodName, 'extension_builder');
 		if ($oldProperty->getName() != $newProperty->getName()) {
 			// rename the method
 			$mergedMethod->setName($newMethodName);
@@ -688,7 +693,7 @@ class RoundTrip extends \TYPO3\PackageBuilder\Service\AbstractRoundTrip {
 	 * @return void
 	 */
 	protected function removeDomainObjectFiles($domainObject) {
-		\t3lib_div::devlog('Remove domainObject ' . $domainObject->getName(), 'extension_builder', 0);
+		$this->logger->log('Remove domainObject ' . $domainObject->getName(), 'extension_builder', 0);
 		$this->cleanUp(CodeGenerator::getFolderForClassFile($this->previousExtensionDirectory, 'Model', FALSE), $domainObject->getName() . '.php');
 		$this->cleanUp($this->previousExtensionDirectory . 'Configuration/TCA/', $domainObject->getName() . '.php');
 		if ($domainObject->isAggregateRoot()) {
@@ -706,11 +711,11 @@ class RoundTrip extends \TYPO3\PackageBuilder\Service\AbstractRoundTrip {
 		if (file_exists($locallang_cshFile)) {
 			// no overwrite settings check here...
 			unlink($locallang_cshFile);
-			\t3lib_div::devLog('locallang_csh file removed: ' . $locallang_cshFile, 'extension_builder', 1);
+			$this->logger->log('locallang_csh file removed: ' . $locallang_cshFile, 'extension_builder', 1);
 		}
 		if (file_exists($iconFile)) {
 			unlink($iconFile);
-			\t3lib_div::devLog('icon file removed: ' . $iconFile, 'extension_builder', 1);
+			$this->logger->log('icon file removed: ' . $iconFile, 'extension_builder', 1);
 		}
 	}
 
@@ -727,7 +732,7 @@ class RoundTrip extends \TYPO3\PackageBuilder\Service\AbstractRoundTrip {
 			return;
 		}
 		if (!is_file(($path . $fileName))) {
-			\t3lib_div::devLog(('cleanUp File not found: ' . $path) . $fileName, 'extension_builder', 1);
+			$this->logger->log(('cleanUp File not found: ' . $path) . $fileName, 'extension_builder', 1);
 			return;
 		}
 		unlink($path . $fileName);
@@ -792,7 +797,7 @@ class RoundTrip extends \TYPO3\PackageBuilder\Service\AbstractRoundTrip {
 			if ($existingTca) {
 				foreach ($domainObject->getAnyToManyRelationProperties() as $relationProperty) {
 					if (isset($existingTca['columns'][$relationProperty->getName()]['config']['MM'])) {
-						\t3lib_div::devlog((('Relation table for Model ' . $domainObject->getName()) . ' relation ') . $relationProperty->getName(), 'extension_builder', 0, $existingTca['columns'][$relationProperty->getName()]['config']);
+						//self::logger->log((('Relation table for Model ' . $domainObject->getName()) . ' relation ') . $relationProperty->getName(), 'extension_builder', 0, $existingTca['columns'][$relationProperty->getName()]['config']);
 						$relationProperty->setRelationTableName($existingTca['columns'][$relationProperty->getName()]['config']['MM']);
 					}
 				}
@@ -866,7 +871,7 @@ class RoundTrip extends \TYPO3\PackageBuilder\Service\AbstractRoundTrip {
 		} catch (Exception $e) {
 			throw new \Exception('Code generation aborted:' . $e->getMessage());
 		}
-		\t3lib_div::devlog('Backup created in ' . $backupDir, 'extension_builder', 0);
+		//$this->logger->log('Backup created in ' . $backupDir, 'extension_builder', 0);
 	}
 
 	/**
