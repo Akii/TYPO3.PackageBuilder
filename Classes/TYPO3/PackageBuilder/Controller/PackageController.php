@@ -2,7 +2,7 @@
 namespace TYPO3\PackageBuilder\Controller;
 
 /*                                                                        *
- * This script belongs to the Flow package "TYPO3.PackageBuilder".       *
+ * This script belongs to the Flow package "TYPO3.PackageBuilder".        *
  *                                                                        *
  *                                                                        */
 

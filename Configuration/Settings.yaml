@@ -3,19 +3,19 @@ TYPO3:
 
     log:
       backendOptions:
-        logFileURL: '%FLOW3_PATH_DATA%Logs/PackageBuilder.log'
+        logFileURL: '%FLOW_PATH_DATA%Logs/PackageBuilder.log'
         createParentDirectories: TRUE
         logMessageOrigin: TRUE
         severityThreshold: %LOG_DEBUG%
 
     codeGeneration:
-      frameWork: FLOW3
-      FLOW3:
-        codeTemplateRootPath: '%FLOW3_PATH_PACKAGES%Application/TYPO3.PackageBuilder/Resources/Private/CodeTemplates/FLOW3/'
-        packagesDir: '%FLOW3_PATH_PACKAGES%Application'
+      frameWork: FLOW
+      FLOW:
+        codeTemplateRootPath: '%FLOW_PATH_PACKAGES%Application/TYPO3.PackageBuilder/Resources/Private/CodeTemplates/Flow/'
+        packagesDir: '%FLOW_PATH_PACKAGES%Application'
       TYPO3:
-        codeTemplateRootPath: '%FLOW3_PATH_PACKAGES%Application/TYPO3.PackageBuilder/Resources/Private/CodeTemplates/TYPO3/'
-        packagesDir: '%FLOW3_PATH_ROOT%Data/Extensions/'
+        codeTemplateRootPath: '%FLOW_PATH_PACKAGES%Application/TYPO3.PackageBuilder/Resources/Private/CodeTemplates/TYPO3/'
+        packagesDir: '%FLOW_PATH_ROOT%Data/Extensions/'
 
 
     panels:

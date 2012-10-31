@@ -21,11 +21,7 @@
 		},
 		{
 			"type": "vcs",
-			"url": "http://github.com/nicodh/TYPO3.ParserApi"
-		},
-		{
-			"type": "vcs",
-			"url": "http://github.com/nicodh/TYPO3.ParserApi"
+			"url": "http://github.com/nicodh/php_parser_api"
 		},
 		{
 			"type": "vcs",
