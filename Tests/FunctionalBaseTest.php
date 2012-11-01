@@ -112,27 +112,24 @@ abstract class FunctionalBaseTest extends \TYPO3\Flow\Tests\FunctionalTestCase{
 				->method('getExtensionDir')
 				->will($this->returnValue($this->testDir));
 
-		$this->codeGenerator = $this->getMock($this->buildAccessibleProxy('\\TYPO3\\PackageBuilder\\Service\\TYPO3\CodeGenerator'), array('dummy'));
-
-		$this->configurationManager = $this->objectManager->get('\\TYPO3\\PackageBuilder\\Configuration\\TYPO3\\ConfigurationManager');
-
 		$this->classBuilder = $this->objectManager->get('\\TYPO3\\PackageBuilder\\Service\\TYPO3\\ClassBuilder');
 		$this->classBuilder->initialize($this->extension, FALSE);
-		$this->inject($this->codeGenerator, 'classBuilder', $this->classBuilder);
-		$this->inject($this->codeGenerator, 'objectManager', $this->objectManager);
+		$this->inject($this->classBuilder, 'logger', new \TYPO3\Flow\Log\Logger());
+		$this->codeGenerator = $this->objectManager->get('\\TYPO3\\PackageBuilder\\Service\\TYPO3\CodeGenerator');
+		$this->configurationManager = $this->objectManager->get('\\TYPO3\\PackageBuilder\\Configuration\\TYPO3\\ConfigurationManager');
 		$this->inject($this->codeGenerator, 'codeTemplateRootPath', $this->packagePath . 'Resources/Private/CodeTemplates/TYPO3/');
 		$this->inject($this->codeGenerator, 'extension', $this->extension);
 		$this->inject($this->codeGenerator, 'editModeEnabled', FALSE);
 		$this->inject($this->classBuilder, 'codeGenerator', $this->codeGenerator);
-		$this->inject($this->classBuilder, 'packageConfigurationManager', $this->configurationManager);
-		$this->inject($this->classBuilder, 'logger', new \TYPO3\Flow\Log\Logger());
-		$this->classBuilder->initialize($this->extension, FALSE);
+
 
 	}
 
 	public function tearDown() {
-		\TYPO3\Flow\Utility\Files::emptyDirectoryRecursively($this->testDir);
-		rmdir($this->testDir);
+		if(is_dir($this->testDir)) {
+			\TYPO3\Flow\Utility\Files::emptyDirectoryRecursively($this->testDir);
+			rmdir($this->testDir);
+		}
 	}
 
 	protected function parseFile($fileName) {
