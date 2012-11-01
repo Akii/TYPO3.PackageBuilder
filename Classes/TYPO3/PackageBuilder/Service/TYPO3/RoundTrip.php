@@ -72,11 +72,6 @@ class RoundTrip extends \TYPO3\PackageBuilder\Service\AbstractRoundTrip {
 	protected $classParser;
 
 	/**
-	 * @var ClassBuilder
-	 */
-	protected $classBuilder;
-
-	/**
 	 * @var \TYPO3\PackageBuilder\Configuration\TYPO3\ConfigurationManager
 	 */
 	protected $configurationManager;
@@ -100,16 +95,6 @@ class RoundTrip extends \TYPO3\PackageBuilder\Service\AbstractRoundTrip {
 	public function injectClassParser(\TYPO3\PackageBuilder\Utility\ClassParser $classParser) {
 		$this->classParser = $classParser;
 	}
-
-	/**
-	 * @param ClassBuilder $classBuilder
-	 * @return void
-	 */
-	public function injectClassBuilder(ClassBuilder $classBuilder) {
-		$this->classBuilder = $classBuilder;
-	}
-
-
 
 	/**
 	 * If a JSON file is found in the extensions directory the previous version
@@ -578,8 +563,8 @@ class RoundTrip extends \TYPO3\PackageBuilder\Service\AbstractRoundTrip {
 		}
 		if ($newProperty->getTypeForComment() != $this->updateExtensionKey($oldProperty->getTypeForComment())) {
 			if ($oldProperty->isBoolean() && !$newProperty->isBoolean()) {
-				$this->classObject->removeMethod($this->classBuilder->getMethodName($oldProperty, 'is'));
-				$this->logger->log('Method removed:' . $this->classBuilder->getMethodName($oldProperty, 'is'), 'extension_builder', 1, $this->classObject->getMethods());
+				$this->classObject->removeMethod(\TYPO3\PackageBuilder\Utility\Tools::getMethodName($oldProperty, 'is'));
+				$this->logger->log('Method removed:' . \TYPO3\PackageBuilder\Utility\Tools::getMethodName($oldProperty, 'is'), 'extension_builder', 1, $this->classObject->getMethods());
 			}
 		}
 	}
@@ -593,14 +578,14 @@ class RoundTrip extends \TYPO3\PackageBuilder\Service\AbstractRoundTrip {
 	 * @return void
 	 */
 	protected function updateMethod($oldProperty, $newProperty, $methodType) {
-		$oldMethodName = $this->classBuilder->getMethodName($oldProperty, $methodType);
+		$oldMethodName = \TYPO3\PackageBuilder\Utility\Tools::getMethodName($oldProperty, $methodType);
 		// the method to be merged
 		$mergedMethod = $this->classObject->getMethod($oldMethodName);
 		if (!$mergedMethod) {
 			// no previous version of the method exists
 			return;
 		}
-		$newMethodName = $this->classBuilder->getMethodName($newProperty, $methodType);
+		$newMethodName = \TYPO3\PackageBuilder\Utility\Tools::getMethodName($newProperty, $methodType);
 		$this->logger->log((('updateMethod:' . $oldMethodName) . '=>') . $newMethodName, 'extension_builder');
 		if ($oldProperty->getName() != $newProperty->getName()) {
 			// rename the method
@@ -616,8 +601,8 @@ class RoundTrip extends \TYPO3\PackageBuilder\Service\AbstractRoundTrip {
 			$parameterTags = $mergedMethod->getTagsValues('param');
 			foreach ($methodParameters as $methodParameter) {
 				$oldParameterName = $methodParameter->getName();
-				if ($oldParameterName == $this->classBuilder->getParameterName($oldProperty, $methodType)) {
-					$newParameterName = $this->classBuilder->getParameterName($newProperty, $methodType);
+				if ($oldParameterName == \TYPO3\PackageBuilder\Utility\Tools::getParameterName($oldProperty, $methodType)) {
+					$newParameterName = \TYPO3\PackageBuilder\Utility\Tools::getParameterName($newProperty, $methodType);
 					$methodParameter->setName($newParameterName);
 					$newMethodBody = $this->replacePropertyNameInMethodBody($oldParameterName, $newParameterName, $mergedMethod->getBody());
 					$mergedMethod->setBody($newMethodBody);
@@ -628,7 +613,7 @@ class RoundTrip extends \TYPO3\PackageBuilder\Service\AbstractRoundTrip {
 						$methodParameter->setTypeHint($this->updateExtensionKey($this->getForeignClassName($newProperty)));
 					}
 				}
-				$parameterTags[$methodParameter->getPosition()] = $this->classBuilder->getParamTag($newProperty, $methodType);
+				$parameterTags[$methodParameter->getPosition()] = \TYPO3\PackageBuilder\Utility\Tools::getParamTag($newProperty, $methodType);
 				$mergedMethod->replaceParameter($methodParameter);
 			}
 			$mergedMethod->setTag('param', $parameterTags);

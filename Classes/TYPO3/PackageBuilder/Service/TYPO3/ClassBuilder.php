@@ -230,7 +230,7 @@ class ClassBuilder extends \TYPO3\PackageBuilder\Service\AbstractClassBuilder {
 	protected function buildGetterMethod($domainProperty) {
 
 		// add (or update) a getter method
-		$getterMethodName = $this->getMethodName($domainProperty, 'get');
+		$getterMethodName = \TYPO3\PackageBuilder\Utility\Tools::getMethodName($domainProperty, 'get');
 		if ($this->classObject->methodExists($getterMethodName)) {
 			$getterMethod = $this->classObject->getMethod($getterMethodName);
 			//$getterMethodTags = $getterMethod->getTags();
@@ -257,9 +257,9 @@ class ClassBuilder extends \TYPO3\PackageBuilder\Service\AbstractClassBuilder {
 	 */
 	protected function buildSetterMethod($domainProperty) {
 
-		$propertyName = $this->getParameterName($domainProperty, 'set');
+		$propertyName = \TYPO3\PackageBuilder\Utility\Tools::getParameterName($domainProperty, 'set');
 		// add (or update) a setter method
-		$setterMethodName = $this->getMethodName($domainProperty, 'set');
+		$setterMethodName = \TYPO3\PackageBuilder\Utility\Tools::getMethodName($domainProperty, 'set');
 		if ($this->classObject->methodExists($setterMethodName)) {
 			$setterMethod = $this->classObject->getMethod($setterMethodName);
 			//$setterMethodTags = $setterMethod->getTags();
@@ -299,7 +299,7 @@ class ClassBuilder extends \TYPO3\PackageBuilder\Service\AbstractClassBuilder {
 
 		$propertyName = $domainProperty->getName();
 
-		$addMethodName = $this->getMethodName($domainProperty, 'add');
+		$addMethodName = \TYPO3\PackageBuilder\Utility\Tools::getMethodName($domainProperty, 'add');
 
 		if ($this->classObject->methodExists($addMethodName)) {
 			$addMethod = $this->classObject->getMethod($addMethodName);
@@ -317,7 +317,7 @@ class ClassBuilder extends \TYPO3\PackageBuilder\Service\AbstractClassBuilder {
 		$addParameters = $addMethod->getParameterNames();
 
 		if (!in_array(Tx_ExtensionBuilder_Utility_Inflector::singularize($propertyName), $addParameters)) {
-			$addParameter = new Model\ClassObject\MethodParameter($this->getParameterName($domainProperty, 'add'));
+			$addParameter = new Model\ClassObject\MethodParameter(\TYPO3\PackageBuilder\Utility\Tools::getParameterName($domainProperty, 'add'));
 			$addParameter->setVarType($domainProperty->getForeignClassName());
 			$addParameter->setTypeHint($domainProperty->getForeignClassName());
 			$addMethod->setParameter($addParameter);
@@ -338,7 +338,7 @@ class ClassBuilder extends \TYPO3\PackageBuilder\Service\AbstractClassBuilder {
 
 		$propertyName = $domainProperty->getName();
 
-		$removeMethodName = $this->getMethodName($domainProperty, 'remove');
+		$removeMethodName = \TYPO3\PackageBuilder\Utility\Tools::getMethodName($domainProperty, 'remove');
 
 		if ($this->classObject->methodExists($removeMethodName)) {
 			$removeMethod = $this->classObject->getMethod($removeMethodName);
@@ -355,8 +355,8 @@ class ClassBuilder extends \TYPO3\PackageBuilder\Service\AbstractClassBuilder {
 
 		$removeParameters = $removeMethod->getParameterNames();
 
-		if (!in_array($this->getParameterName($domainProperty, 'remove'), $removeParameters)) {
-			$removeParameter = new Model\ClassObject\MethodParameter($this->getParameterName($domainProperty, 'remove'));
+		if (!in_array(\TYPO3\PackageBuilder\Utility\Tools::getParameterName($domainProperty, 'remove'), $removeParameters)) {
+			$removeParameter = new Model\ClassObject\MethodParameter(\TYPO3\PackageBuilder\Utility\Tools::getParameterName($domainProperty, 'remove'));
 			$removeParameter->setVarType($domainProperty->getForeignClassName());
 			$removeParameter->setTypeHint($domainProperty->getForeignClassName());
 			$removeMethod->setParameter($removeParameter);
@@ -377,7 +377,7 @@ class ClassBuilder extends \TYPO3\PackageBuilder\Service\AbstractClassBuilder {
 	 */
 	protected function buildIsMethod($domainProperty) {
 
-		$isMethodName = $this->getMethodName($domainProperty, 'is');
+		$isMethodName = \TYPO3\PackageBuilder\Utility\Tools::getMethodName($domainProperty, 'is');
 
 		if ($this->classObject->methodExists($isMethodName)) {
 			$isMethod = $this->classObject->getMethod($isMethodName);
@@ -433,54 +433,6 @@ class ClassBuilder extends \TYPO3\PackageBuilder\Service\AbstractClassBuilder {
 		return $actionMethod;
 	}
 
-	/**
-	 *
-	 * @param Model\DomainObject\AbstractProperty $property
-	 * @param string $methodType (get,set,add,remove,is)
-	 * @return string method name
-	 */
-	public function getMethodName($domainProperty, $methodType) {
-		$propertyName = $domainProperty->getName();
-		switch ($methodType) {
-			case 'set'        :
-				return 'set' . ucfirst($propertyName);
-
-			case 'get'        :
-				return 'get' . ucfirst($propertyName);
-
-			case 'add'        :
-				return 'add' . ucfirst(\Sho_Inflect::singularize($propertyName));
-
-			case 'remove'    :
-				return 'remove' . ucfirst(\Sho_Inflect::singularize($propertyName));
-
-			case 'is'        :
-				return 'is' . ucfirst($propertyName);
-		}
-	}
-
-	/**
-	 *
-	 * @param Model\DomainObject\AbstractProperty $property
-	 * @param string $methodType (set,add,remove)
-	 * @return string method body
-	 */
-	public function getParameterName($domainProperty, $methodType) {
-
-		$propertyName = $domainProperty->getName();
-
-		switch ($methodType) {
-
-			case 'set'            :
-				return $propertyName;
-
-			case 'add'            :
-				return \Sho_Inflect::singularize($propertyName);
-
-			case 'remove'        :
-				return \Sho_Inflect::singularize($propertyName) . 'ToRemove';
-		}
-	}
 
 	public function getParamTag($domainProperty, $methodType) {
 
@@ -490,12 +442,12 @@ class ClassBuilder extends \TYPO3\PackageBuilder\Service\AbstractClassBuilder {
 
 			case 'add'        :
 				$paramTag = $domainProperty->getForeignClassName();
-				$paramTag .= ' $' . $this->getParameterName($domainProperty, 'add');
+				$paramTag .= ' $' . \TYPO3\PackageBuilder\Utility\Tools::getParameterName($domainProperty, 'add');
 				return $paramTag;
 
 			case 'remove'    :
 				$paramTag = $domainProperty->getForeignClassName();
-				$paramTag .= ' $' . $this->getParameterName($domainProperty, 'remove');
+				$paramTag .= ' $' . \TYPO3\PackageBuilder\Utility\Tools::getParameterName($domainProperty, 'remove');
 				$paramTag .= ' The ' . $domainProperty->getForeignModelName() . ' to be removed';
 				return $paramTag;
 		}
@@ -630,7 +582,7 @@ class ClassBuilder extends \TYPO3\PackageBuilder\Service\AbstractClassBuilder {
 				$sortedProperties[$objectProperty->getName()] = $this->classObject->getProperty($objectProperty->getName());
 				$methodPrefixes = array('get', 'set', 'add', 'remove', 'is');
 				foreach ($methodPrefixes as $methodPrefix) {
-					$methodName = $this->getMethodName($objectProperty, $methodPrefix);
+					$methodName = \TYPO3\PackageBuilder\Utility\Tools::getMethodName($objectProperty, $methodPrefix);
 					if ($this->classObject->methodExists($methodName)) {
 						$propertyRelatedMethods[$methodName] = $this->classObject->getMethod($methodName);
 					}

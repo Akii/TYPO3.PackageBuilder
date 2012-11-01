@@ -299,5 +299,54 @@ class Tools {
 		}
 	}
 
+	/**
+	 *
+	 * @param \TYPO3\PackageBuilder\Domain\Model\DomainObject\AbstractProperty $property
+	 * @param string $methodType (get,set,add,remove,is)
+	 * @return string method name
+	 */
+	static public function getMethodName($domainProperty, $methodType) {
+		$propertyName = $domainProperty->getName();
+		switch ($methodType) {
+			case 'set'        :
+				return 'set' . ucfirst($propertyName);
+
+			case 'get'        :
+				return 'get' . ucfirst($propertyName);
+
+			case 'add'        :
+				return 'add' . ucfirst(\Sho_Inflect::singularize($propertyName));
+
+			case 'remove'    :
+				return 'remove' . ucfirst(\Sho_Inflect::singularize($propertyName));
+
+			case 'is'        :
+				return 'is' . ucfirst($propertyName);
+		}
+	}
+
+	/**
+	 *
+	 * @param \TYPO3\PackageBuilder\Domain\Model\DomainObject\AbstractProperty $property
+	 * @param string $methodType (set,add,remove)
+	 * @return string method body
+	 */
+	static public function getParameterName($domainProperty, $methodType) {
+
+		$propertyName = $domainProperty->getName();
+
+		switch ($methodType) {
+
+			case 'set'            :
+				return $propertyName;
+
+			case 'add'            :
+				return \Sho_Inflect::singularize($propertyName);
+
+			case 'remove'        :
+				return \Sho_Inflect::singularize($propertyName) . 'ToRemove';
+		}
+	}
+
 }
 
