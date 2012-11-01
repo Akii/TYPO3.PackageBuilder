@@ -1,0 +1,231 @@
+{"domainObjects": [
+	{
+		"config": {
+			"position": [131, 93]
+		},
+		"name": "New Model Object",
+		"value": {
+			"actionGroup": {
+				"_default0_list": true,
+				"_default1_show": true,
+				"_default2_new_create": true,
+				"_default3_edit_update": true,
+				"_default4_delete": true,
+				"customActions": ["calculate"]
+			},
+			"name": "Model1",
+			"objectsettings": {
+				"aggregateRoot": true,
+				"description": "The main model",
+				"mapToTable": "",
+				"parentClass": "",
+				"sorting": true,
+				"type": "Entity",
+				"uid": "729417196888"
+			},
+			"propertyGroup": {
+				"properties": [
+					{
+						"propertyDescription": "This is the name",
+						"propertyIsExcludeField": false,
+						"propertyIsRequired": true,
+						"propertyName": "name",
+						"propertyType": "String",
+						"uid": "866948257884"
+					}
+				]
+			},
+			"relationGroup": {
+				"relations": [
+					{
+						"foreignRelationClass": "",
+						"lazyLoading": false,
+						"propertyIsExcludeField": false,
+						"relationDescription": "",
+						"relationName": "children1",
+						"relationType": "zeroToMany",
+						"relationWire": "[wired]",
+						"uid": "1024828061350"
+					},
+					{
+						"foreignRelationClass": "",
+						"lazyLoading": false,
+						"propertyIsExcludeField": false,
+						"relationDescription": "The children of this model",
+						"relationName": "children2",
+						"relationType": "manyToMany",
+						"relationWire": "[wired]",
+						"uid": "1309077950810"
+					}
+				]
+			}
+		}
+	},
+	{
+		"config": {
+			"position": [669, 70]
+		},
+		"name": "New Model Object",
+		"value": {
+			"actionGroup": {
+				"_default0_list": false,
+				"_default1_show": false,
+				"_default2_new_create": false,
+				"_default3_edit_update": false,
+				"_default4_delete": false,
+				"customActions": []
+			},
+			"name": "Child1",
+			"objectsettings": {
+				"aggregateRoot": false,
+				"description": "",
+				"mapToTable": "",
+				"parentClass": "",
+				"sorting": false,
+				"type": "Entity",
+				"uid": "226390083995"
+			},
+			"propertyGroup": {
+				"properties": [
+					{
+						"propertyDescription": "",
+						"propertyIsExcludeField": false,
+						"propertyIsRequired": true,
+						"propertyName": "title",
+						"propertyType": "String",
+						"uid": "1260918362690"
+					}
+				]
+			},
+			"relationGroup": {
+				"relations": []
+			}
+		}
+	},
+	{
+		"config": {
+			"position": [669, 237]
+		},
+		"name": "New Model Object",
+		"value": {
+			"actionGroup": {
+				"_default0_list": false,
+				"_default1_show": false,
+				"_default2_new_create": false,
+				"_default3_edit_update": false,
+				"_default4_delete": false,
+				"customActions": []
+			},
+			"name": "Child2",
+			"objectsettings": {
+				"aggregateRoot": false,
+				"description": "",
+				"mapToTable": "",
+				"parentClass": "",
+				"sorting": false,
+				"type": "Entity",
+				"uid": "491735126568"
+			},
+			"propertyGroup": {
+				"properties": [
+					{
+						"propertyDescription": "",
+						"propertyIsExcludeField": false,
+						"propertyIsRequired": false,
+						"propertyName": "color",
+						"propertyType": "String",
+						"uid": "1265821940753"
+					},
+					{
+						"propertyDescription": "",
+						"propertyIsExcludeField": false,
+						"propertyIsRequired": false,
+						"propertyName": "reliable",
+						"propertyType": "Boolean",
+						"uid": "13779364125"
+					}
+				]
+			},
+			"relationGroup": {
+				"relations": []
+			}
+		}
+	}
+], "properties": {
+	"backendModules": [
+		{
+			"actions": {
+				"controllerActionCombinations": ""
+			},
+			"description": "Some Module",
+			"key": "m1",
+			"mainModule": "web",
+			"name": "Test Module",
+			"tabLabel": "An example module"
+		}
+	],
+	"description": "Test Extension",
+	"emConf": {
+		"category": "plugin",
+		"custom_category": "",
+		"dependsOn": "extbase => 1.5\nfluid => 1.5\ntypo3 => 4.7\n",
+		"disableVersioning": false,
+		"priority": "last",
+		"shy": false,
+		"state": "beta",
+		"targetVersion": "4.7",
+		"version": ""
+	},
+	"extensionKey": "dummy",
+	"name": "Dummy Extension",
+	"nameSpace":"DUMMY",
+	"originalExtensionKey": "",
+	"persons": [
+		{
+			"company": "ndh websolutions",
+			"email": "mail@ndh-websolutions.de",
+			"name": "Nico de Haen",
+			"role": "Developer"
+		}
+	],
+	"plugins": [
+		{
+			"actions": {
+				"controllerActionCombinations": "",
+				"noncacheableActions": "",
+				"switchableActions": ""
+			},
+			"key": "p1",
+			"name": "Plugin 1"
+		}
+	]
+}, "wires": [
+	{
+		"src": {
+			"moduleId": 0,
+			"terminal": "relationWire_0",
+			"uid": "1024828061350"
+		},
+		"tgt": {
+			"moduleId": 1,
+			"terminal": "SOURCES",
+			"uid": "226390083995"
+		}
+	},
+	{
+		"src": {
+			"moduleId": 0,
+			"terminal": "relationWire_1",
+			"uid": "1309077950810"
+		},
+		"tgt": {
+			"moduleId": 2,
+			"terminal": "SOURCES",
+			"uid": "491735126568"
+		}
+	}
+], "log": {
+	"last_modified": "2012-08-30 09:44",
+	"extension_builder_version": "2.4.0",
+	"be_user": " (1)"
+}}

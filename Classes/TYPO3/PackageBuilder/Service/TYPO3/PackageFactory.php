@@ -180,7 +180,7 @@ class PackageFactory extends \TYPO3\PackageBuilder\Service\AbstractPackageFactor
 			// name
 		$extension->setName(trim($propertyConfiguration['name']));
 			// namespace
-		$extension->setNameSpace(trim($propertyConfiguration['nameSpace']));
+		$extension->setNameSpace(trim($propertyConfiguration['nameSpace']) . '\\' . \TYPO3\PackageBuilder\Utility\Tools::underscoredToUpperCamelCase(trim($propertyConfiguration['extensionKey'])));
 			// description
 		$extension->setDescription($propertyConfiguration['description']);
 			// extensionKey

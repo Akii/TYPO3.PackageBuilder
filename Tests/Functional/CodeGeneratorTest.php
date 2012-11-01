@@ -88,17 +88,11 @@ class CodeGeneratorTest extends \TYPO3\PackageBuilder\Tests\FunctionalBaseTest {
 		$modelClassPath =  $absModelClassDir . $domainObject->getName() . '.php';
 		file_put_contents($modelClassPath,$classFileContent);
 		$this->assertFileExists($modelClassPath,'File was not generated: ' . $modelClassPath);
-		$className = $this->extension->getNameSpace() .  $domainObject->getName();
-		if(!class_exists($className)) {
-			include($modelClassPath);
-		}
-		$this->assertTrue(class_exists($className),'Class was not generated:'.$className);
-
-		$reflection = new ReflectionClass($className);
-		$this->assertTrue($reflection->hasMethod('get' . ucfirst($propertyName)),'Getter was not generated');
-		$this->assertTrue($reflection->hasMethod('set' . ucfirst($propertyName)),'Setter was not generated');
-		$this->assertFalse($reflection->hasMethod('is' . ucfirst($propertyName)),'isMethod should not be generated');
-		$setterMethod = $reflection->getMethod('set' . ucfirst($propertyName));
+		$classObject = $this->parseFile($modelClassPath);
+		$this->assertTrue($classObject->methodExists('get' . ucfirst($propertyName)),'Getter was not generated');
+		$this->assertTrue($classObject->methodExists('set' . ucfirst($propertyName)),'Setter was not generated');
+		$this->assertFalse($classObject->methodExists('is' . ucfirst($propertyName)),'isMethod should not be generated');
+		$setterMethod = $classObject->getMethod('set' . ucfirst($propertyName));
 		$parameters = $setterMethod->getParameters();
 		$this->assertEquals(1, count($parameters),'Wrong parameter count in setter method');
 		$parameter = current($parameters);

@@ -106,7 +106,7 @@ abstract class FunctionalBaseTest extends \TYPO3\Flow\Tests\FunctionalTestCase{
 		//$dummyExtensionDir = PATH_typo3conf.'ext/extension_builder/Tests/Examples/'.$extensionKey.'/';
 
 		$this->extension->setExtensionKey($extensionKey);
-		$this->extension->setNamespace('DUMMY');
+		$this->extension->setNamespace('DUMMY\\Dummy');
 		$this->extension->expects(
 			$this->any())
 				->method('getExtensionDir')
@@ -127,14 +127,16 @@ abstract class FunctionalBaseTest extends \TYPO3\Flow\Tests\FunctionalTestCase{
 
 	public function tearDown() {
 		if(is_dir($this->testDir)) {
-			\TYPO3\Flow\Utility\Files::emptyDirectoryRecursively($this->testDir);
-			rmdir($this->testDir);
+			//\TYPO3\Flow\Utility\Files::emptyDirectoryRecursively($this->testDir);
+			//rmdir($this->testDir);
 		}
 	}
 
 	protected function parseFile($fileName) {
-		$classFilePath = $this->packagePath . 'Tests/Fixtures/' . $fileName;
-		$classFileObject = $this->parser->parseFile($classFilePath);
+			// allow absolute and relative paths
+		$fileName = str_replace($this->testDir, '', $fileName);
+		$classFilePath = $this->testDir . $fileName;
+		$classFileObject = $this->parser->parseFile($classFilePath)->getFirstClass();
 		return $classFileObject;
 	}
 
