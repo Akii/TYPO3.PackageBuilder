@@ -122,7 +122,6 @@ abstract class FunctionalBaseTest extends \TYPO3\Flow\Tests\FunctionalTestCase{
 		$this->inject($this->codeGenerator, 'editModeEnabled', FALSE);
 		$this->inject($this->classBuilder, 'codeGenerator', $this->codeGenerator);
 
-
 	}
 
 	public function tearDown() {

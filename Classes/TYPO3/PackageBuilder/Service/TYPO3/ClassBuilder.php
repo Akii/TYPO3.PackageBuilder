@@ -269,7 +269,7 @@ class ClassBuilder extends \TYPO3\PackageBuilder\Service\AbstractClassBuilder {
 			$setterMethod = new Model\ClassObject\Method($setterMethodName);
 			// default method body
 			$setterMethod->setBody($this->codeGenerator->getDefaultMethodBody(NULL, $domainProperty, 'Model', 'set', ''));
-			$setterMethod->setTag('param', $this->getParamTag($domainProperty, 'set'));
+			$setterMethod->setTag('param', \TYPO3\PackageBuilder\Utility\Tools::getParamTag($domainProperty, 'set'));
 			$setterMethod->setTag('return', 'void');
 			$setterMethod->addModifier('public');
 		}
@@ -309,7 +309,7 @@ class ClassBuilder extends \TYPO3\PackageBuilder\Service\AbstractClassBuilder {
 			$addMethod = new Model\ClassObject\Method($addMethodName);
 			// default method body
 			$addMethod->setBody($this->codeGenerator->getDefaultMethodBody(NULL, $domainProperty, 'Model', 'add', ''));
-			$addMethod->setTag('param', $this->getParamTag($domainProperty, 'add'));
+			$addMethod->setTag('param', \TYPO3\PackageBuilder\Utility\Tools::getParamTag($domainProperty, 'add'));
 
 			$addMethod->setTag('return', 'void');
 			$addMethod->addModifier('public');
@@ -348,7 +348,7 @@ class ClassBuilder extends \TYPO3\PackageBuilder\Service\AbstractClassBuilder {
 			$removeMethod = new Model\ClassObject\Method($removeMethodName);
 			// default method body
 			$removeMethod->setBody($this->codeGenerator->getDefaultMethodBody(NULL, $domainProperty, 'Model', 'remove', ''));
-			$removeMethod->setTag('param', $this->getParamTag($domainProperty, 'remove'));
+			$removeMethod->setTag('param', \TYPO3\PackageBuilder\Utility\Tools::getParamTag($domainProperty, 'remove'));
 			$removeMethod->setTag('return', 'void');
 			$removeMethod->addModifier('public');
 		}
@@ -433,25 +433,6 @@ class ClassBuilder extends \TYPO3\PackageBuilder\Service\AbstractClassBuilder {
 		return $actionMethod;
 	}
 
-
-	public function getParamTag($domainProperty, $methodType) {
-
-		switch ($methodType) {
-			case 'set'        :
-				return $domainProperty->getTypeForComment() . ' $' . $domainProperty->getName();
-
-			case 'add'        :
-				$paramTag = $domainProperty->getForeignClassName();
-				$paramTag .= ' $' . \TYPO3\PackageBuilder\Utility\Tools::getParameterName($domainProperty, 'add');
-				return $paramTag;
-
-			case 'remove'    :
-				$paramTag = $domainProperty->getForeignClassName();
-				$paramTag .= ' $' . \TYPO3\PackageBuilder\Utility\Tools::getParameterName($domainProperty, 'remove');
-				$paramTag .= ' The ' . $domainProperty->getForeignModelName() . ' to be removed';
-				return $paramTag;
-		}
-	}
 
 	/**
 	 * This method generates the class object, which is passed to the template

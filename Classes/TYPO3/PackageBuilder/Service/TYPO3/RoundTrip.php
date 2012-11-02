@@ -62,12 +62,19 @@ class RoundTrip extends \TYPO3\PackageBuilder\Service\AbstractRoundTrip {
 	 */
 	protected $previousExtensionKey;
 
+	/**
+	 * @var array
+	 */
 	protected $oldDomainObjects = array();
 
+	/**
+	 * @var array
+	 */
 	protected $renamedDomainObjects = array();
 
 	/**
-	 * @var \TYPO3\PackageBuilder\Utility\ClassParser
+	 * @var \TYPO3\ParserApi\Service\Parser
+	 * @Flow\Inject
 	 */
 	protected $classParser;
 
@@ -81,20 +88,13 @@ class RoundTrip extends \TYPO3\PackageBuilder\Service\AbstractRoundTrip {
 	 *
 	 * @var boolean
 	 */
-	protected $extensionRenamed = FALSE;
+	protected $packageRenamed = FALSE;
 
 	/**
 	 * @var \TYPO3\PackageBuilder\Log\FileLogger
 	 */
 	protected $logger;
 
-	/**
-	 * @param \TYPO3\PackageBuilder\Utility\ClassParser $classParser
-	 * @return void
-	 */
-	public function injectClassParser(\TYPO3\PackageBuilder\Utility\ClassParser $classParser) {
-		$this->classParser = $classParser;
-	}
 
 	/**
 	 * If a JSON file is found in the extensions directory the previous version
@@ -107,9 +107,6 @@ class RoundTrip extends \TYPO3\PackageBuilder\Service\AbstractRoundTrip {
 		$this->package = $extension;
 		$this->packageDirectory = $this->package->getExtensionDir();
 		$this->extClassPrefix = $this->package->getExtensionKey();
-		if (!$this->classParser instanceof \TYPO3\PackageBuilder\Utility\ClassParser) {
-			$this->injectClassParser(\t3lib_div::makeInstance('TYPO3\\PackageBuilder\\Utility\\ClassParser'));
-		}
 		$this->settings = $this->configurationManager->getExtensionBuilderSettings();
 		// defaults
 		$this->previousExtensionDirectory = $this->packageDirectory;
@@ -153,7 +150,6 @@ class RoundTrip extends \TYPO3\PackageBuilder\Service\AbstractRoundTrip {
 				}
 			}
 		}
-		spl_autoload_register('TYPO3\\PackageBuilder\\Utility\\ClassLoader::loadClass', FALSE, TRUE);
 	}
 
 	/**
@@ -175,9 +171,8 @@ class RoundTrip extends \TYPO3\PackageBuilder\Service\AbstractRoundTrip {
 			$fileName = (CodeGenerator::getFolderForClassFile($extensionDir, 'Model', FALSE) . $oldDomainObject->getName()) . '.php';
 			if (file_exists($fileName)) {
 				// import the classObject from the existing file
-				include_once $fileName;
 				$className = $oldDomainObject->getClassName();
-				$this->classObject = $this->classParser->parse($className);
+				$this->classObject = $this->classParser->parseFile($fileName)->getFirstClass();
 				//t3lib_div::devlog('Model class methods','extension_builder',0,$this->classObject->getMethods());
 				if ($oldDomainObject->getName() != $currentDomainObject->getName() || $this->packageRenamed) {
 					if (!$this->packageRenamed) {
@@ -234,9 +229,8 @@ class RoundTrip extends \TYPO3\PackageBuilder\Service\AbstractRoundTrip {
 			$fileName = (CodeGenerator::getFolderForClassFile($this->packageDirectory, 'Model', FALSE) . $currentDomainObject->getName()) . '.php';
 			if (file_exists($fileName)) {
 				// import the classObject from the existing file
-				include_once $fileName;
 				$className = $currentDomainObject->getClassName();
-				$this->classObject = $this->classParser->parse($className);
+				$this->classObject = $this->classParser->parseFile($fileName)->getFirstClass();
 				$this->logger->log(('class file found:' . $currentDomainObject->getName()) . '.php', 'extension_builder', 0, (array) $this->classObject->getAnnotations());
 				return $this->classObject;
 			}

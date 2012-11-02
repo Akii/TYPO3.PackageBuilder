@@ -348,5 +348,24 @@ class Tools {
 		}
 	}
 
+	static public function getParamTag($domainProperty, $methodType) {
+
+		switch ($methodType) {
+			case 'set'        :
+				return $domainProperty->getTypeForComment() . ' $' . $domainProperty->getName();
+
+			case 'add'        :
+				$paramTag = $domainProperty->getForeignClassName();
+				$paramTag .= ' $' . self::getParameterName($domainProperty, 'add');
+				return $paramTag;
+
+			case 'remove'    :
+				$paramTag = $domainProperty->getForeignClassName();
+				$paramTag .= ' $' . selft::getParameterName($domainProperty, 'remove');
+				$paramTag .= ' The ' . $domainProperty->getForeignModelName() . ' to be removed';
+				return $paramTag;
+		}
+	}
+
 }
 
